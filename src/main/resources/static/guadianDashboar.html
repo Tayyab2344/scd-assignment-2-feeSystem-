@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guardian Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">FeeSystem</div>
+    <nav>
+      <a href="adminDashboard.html">Admin</a>
+      <a href="guardianDashboard.html">Guardian</a>
+      <a href="studentDashboard.html">Student</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Guardian Dashboard</h1>
+    <div class="dashboard-grid">
+      <div class="card">
+        <h2>Your Children</h2>
+        <ul id="childrenList"><li>Loading…</li></ul>
+      </div>
+      <div class="card">
+        <h2>Outstanding Fees</h2>
+        <p id="outstandingFees">Loading…</p>
+      </div>
+      <div class="card">
+        <h2>Recent Payments</h2>
+        <ul id="recentPayments"><li>Loading…</li></ul>
+      </div>
+      <div class="card">
+        <h2>Notifications</h2>
+        <ul id="guardianNotifications"><li>Loading…</li></ul>
+      </div>
+    </div>
+  </main>
+  <footer>&copy; 2025 FeeSystem SaaS. All rights reserved.</footer>
+
+  <script>
+    async function loadGuardianData() {
+      // For demo, we hardcode an example guardian email.
+      // In real app, you'd get this after login.
+      const email = 'guardian@example.com';
+
+      // 1. Find guardian profile
+      const g = await fetch(`/guardianProfiles/by-email?email=${encodeURIComponent(email)}`)
+                      .then(r=>r.json());
+      // g.studentProfiles is an array of StudentProfile
+      const ulKids = document.getElementById('childrenList');
+      ulKids.innerHTML = '';
+      g.studentProfiles.forEach(s => {
+        const li = document.createElement('li');
+        li.innerText = `${s.fullName} (Adm# ${s.admissionNumber})`;
+        ulKids.appendChild(li);
+      });
+
+      // 2. Outstanding fees across those students
+      let totalDue = 0;
+      for (const s of g.studentProfiles) {
+        const pays = await fetch(`/payments/by-student?studentProfileId=${s.id}`)
+                          .then(r=>r.json());
+        pays.filter(p=>p.status==='Pending')
+            .forEach(p=> totalDue += p.amount);
+      }
+      document.getElementById('outstandingFees').innerText = `$${totalDue.toFixed(2)}`;
+
+      // 3. Recent payments
+      const rp = await fetch(`/payments/by-student?studentProfileId=${g.studentProfiles[0].id}`)
+                        .then(r=>r.json());
+      const ulPay = document.getElementById('recentPayments');
+      ulPay.innerHTML = '';
+      rp.slice(-5).forEach(p => {
+        const li = document.createElement('li');
+        li.innerText = `$${p.amount} on ${p.date}`;
+        ulPay.appendChild(li);
+      });
+
+      // 4. Notifications for guardian
+      const notes = await fetch('/notifications').then(r=>r.json());
+      const ulN = document.getElementById('guardianNotifications');
+      ulN.innerHTML = '';
+      notes.forEach(n => {
+        const li = document.createElement('li');
+        li.innerText = n.message;
+        ulN.appendChild(li);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadGuardianData);
+  </script>
+</body>
+</html>

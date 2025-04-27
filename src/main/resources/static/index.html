@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FeeSystem Portals</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Simple override just for the index page */
+    main { text-align: center; padding: 4rem 1rem; }
+    .portal-grid { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+    .portal-card {
+      background: #fff; padding: 2rem; border-radius: .5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 200px;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .portal-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .portal-card h2 { margin-bottom: 1rem; color: #4f46e5; }
+    .portal-card a { text-decoration: none; color: #374151; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Welcome to FeeSystem</h1>
+    <p>Select your portal:</p>
+    <div class="portal-grid">
+      <div class="portal-card">
+        <h2>Admin</h2>
+        <a href="/admin">Go to Admin Dashboard →</a>
+      </div>
+      <div class="portal-card">
+        <h2>Guardian</h2>
+        <a href="/guardian">Go to Guardian Dashboard →</a>
+      </div>
+      <div class="portal-card">
+        <h2>Student</h2>
+        <a href="/student">Go to Student Dashboard →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

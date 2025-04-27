@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">FeeSystem</div>
+    <nav>
+      <a href="adminDashboard.html">Admin</a>
+      <a href="guardianDashboard.html">Guardian</a>
+      <a href="studentDashboard.html">Student</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Student Dashboard</h1>
+    <div class="dashboard-grid">
+      <div class="card">
+        <h2>Your Classroom</h2>
+        <p id="classroomInfo">Loading…</p>
+      </div>
+      <div class="card">
+        <h2>Upcoming Fees</h2>
+        <p id="upcomingFees">Loading…</p>
+      </div>
+      <div class="card">
+        <h2>Notifications</h2>
+        <ul id="studentNotifications"><li>Loading…</li></ul>
+      </div>
+      <div class="card">
+        <h2>Recent Transactions</h2>
+        <ul id="studentPayments"><li>Loading…</li></ul>
+      </div>
+    </div>
+  </main>
+  <footer>&copy; 2025 FeeSystem SaaS. All rights reserved.</footer>
+
+  <script>
+    async function loadStudentData() {
+      // In a real app you'd pull the studentId after login
+      const studentId = 'STUDENT_ID_PLACEHOLDER';
+
+      // 1. Get student profile
+      const s = await fetch(`/studentProfiles/${studentId}`)
+                    .then(r=>r.json());
+      document.getElementById('classroomInfo')
+              .innerText = s.classroom.name;
+
+      // 2. Upcoming fees = FeeStructures for that classroom
+      const fs = await fetch(`/feeStructures/by-classroom?classroomId=${s.classroom.id}`)
+                      .then(r=>r.json());
+      const next = fs.sort((a,b)=> new Date(a.dueDate) - new Date(b.dueDate))[0];
+      document.getElementById('upcomingFees')
+              .innerText = `$${next.amount.toFixed(2)} due on ${next.dueDate}`;
+
+      // 3. Notifications
+      const notes = await fetch('/notifications/by-date?start=2025-01-01&end=2025-12-31')
+                         .then(r=>r.json());
+      const ulN = document.getElementById('studentNotifications');
+      ulN.innerHTML = '';
+      notes.forEach(n => {
+        const li = document.createElement('li');
+        li.innerText = n.message;
+        ulN.appendChild(li);
+      });
+
+      // 4. Recent payments by this student
+      const pays = await fetch(`/payments/by-student?studentProfileId=${studentId}`)
+                         .then(r=>r.json());
+      const ulP = document.getElementById('studentPayments');
+      ulP.innerHTML = '';
+      pays.slice(-5).forEach(p => {
+        const li = document.createElement('li');
+        li.innerText = `$${p.amount} on ${p.date}`;
+        ulP.appendChild(li);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStudentData);
+  </script>
+</body>
+</html>
